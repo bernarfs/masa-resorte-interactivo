@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz | Frecuencia natural de un saltador</title>
+  <style>
+    :root {
+      --bg: #f7f9ff;
+      --paper: #ffffff;
+      --ink: #18263a;
+      --muted: #607188;
+      --line: #d9e2ef;
+      --blue: #174ea6;
+      --blue-soft: #e8f1ff;
+      --green: #10834a;
+      --green-soft: #e9f8ef;
+      --orange: #ff6a00;
+      --orange-soft: #fff1df;
+      --purple: #6936a8;
+      --purple-soft: #f3ecff;
+      --pink: #e82f78;
+      --pink-soft: #fff0f6;
+      --red: #c43d3d;
+      --shadow: 0 14px 34px rgba(32, 48, 72, 0.12);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top left, rgba(255, 106, 0, 0.13), transparent 28rem),
+        radial-gradient(circle at top right, rgba(23, 78, 166, 0.13), transparent 30rem),
+        var(--bg);
+      color: var(--ink);
+      font-family: "Segoe UI", Arial, sans-serif;
+      line-height: 1.5;
+    }
+
+    main {
+      width: min(1240px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 24px 0 42px;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      color: var(--blue);
+      font-size: clamp(2.3rem, 7vw, 5.4rem);
+      line-height: 0.95;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    h1 span {
+      display: block;
+      color: var(--orange);
+    }
+
+    .top-grid {
+      display: grid;
+      grid-template-columns: 1.25fr 0.95fr;
+      gap: 18px;
+      align-items: start;
+      margin-bottom: 18px;
+    }
+
+    .statement {
+      padding: 18px;
+      border: 2px dashed var(--purple);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: var(--shadow);
+      font-size: 1.05rem;
+      font-weight: 650;
+    }
+
+    .exercise-nav {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .exercise-link {
+      display: block;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--paper);
+      color: var(--ink);
+      text-decoration: none;
+      box-shadow: 0 10px 20px rgba(32, 48, 72, 0.07);
+      transition: transform 160ms ease, border-color 160ms ease;
+    }
+
+    .exercise-link:hover,
+    .exercise-link:focus {
+      border-color: rgba(23, 78, 166, 0.55);
+      transform: translateY(-2px);
+      outline: none;
+    }
+
+    .exercise-link.current {
+      background: var(--blue-soft);
+      border-color: rgba(23, 78, 166, 0.5);
+    }
+
+    .exercise-link strong {
+      display: block;
+      color: var(--blue);
+    }
+
+    .exercise-link span {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: 1.05fr 1.65fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel,
+    .quiz-card,
+    .verify-card,
+    .memory-card {
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .panel {
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .panel-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding: 7px 12px;
+      border-radius: 8px;
+      color: white;
+      background: var(--purple);
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .diagram {
+      position: relative;
+      min-height: 430px;
+      overflow: hidden;
+      border: 2px solid #aa79d6;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    }
+
+    .diagram-badge {
+      position: absolute;
+      z-index: 3;
+      top: 0;
+      left: 50%;
+      padding: 7px 18px;
+      border-radius: 0 0 8px 8px;
+      color: white;
+      background: var(--purple);
+      font-weight: 900;
+      text-transform: uppercase;
+      transform: translateX(-50%);
+      box-shadow: 0 8px 18px rgba(105, 54, 168, 0.22);
+    }
+
+    .bridge-svg {
+      position: absolute;
+      inset: 28px 18px 16px;
+      width: calc(100% - 36px);
+      height: calc(100% - 44px);
+      overflow: visible;
+    }
+
+    .bridge-deck,
+    .bridge-tower,
+    .bridge-cable,
+    .bridge-hanger,
+    .bridge-anchor,
+    .bridge-weight,
+    .rope-line,
+    .length-arrow,
+    .length-guide {
+      vector-effect: non-scaling-stroke;
+    }
+
+    .bridge-deck {
+      stroke: #1d2d5f;
+      stroke-width: 6;
+      stroke-linecap: round;
+    }
+
+    .bridge-tower {
+      fill: #e9edf4;
+      stroke: #1d2d5f;
+      stroke-width: 4;
+    }
+
+    .bridge-cable {
+      fill: none;
+      stroke: #1d2d5f;
+      stroke-width: 4;
+    }
+
+    .bridge-hanger {
+      stroke: #1d2d5f;
+      stroke-width: 2;
+    }
+
+    .bridge-anchor {
+      fill: #8b877f;
+      stroke: #2d3138;
+      stroke-width: 2;
+    }
+
+    .bridge-weight {
+      fill: #777;
+      stroke: #2d3138;
+      stroke-width: 2;
+    }
+
+    .rope-line {
+      stroke: #5a2115;
+      stroke-width: 5;
+      stroke-linecap: round;
+      transform-origin: 50% 19%;
+      animation: ropeSwing 2.8s ease-in-out infinite;
+    }
+
+    .length-arrow {
+      stroke: #1f2f40;
+      stroke-width: 2;
+      marker-start: url("#lengthArrowBack");
+      marker-end: url("#lengthArrow");
+    }
+
+    .length-guide {
+      stroke: #8da0b9;
+      stroke-width: 2;
+      stroke-dasharray: 8 8;
+    }
+
+    .length-text {
+      fill: #18263a;
+      font-size: 19px;
+      font-weight: 900;
+    }
+
+    .length-number {
+      fill: var(--purple);
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .jumper-group {
+      transform-origin: 50% 82%;
+      animation: jumperBob 2.8s ease-in-out infinite;
+    }
+
+    .jumper-shirt {
+      fill: #f7f2df;
+      stroke: #152236;
+      stroke-width: 2;
+    }
+
+    .jumper-pants {
+      fill: #1c344b;
+      stroke: #152236;
+      stroke-width: 2;
+    }
+
+    .jumper-skin {
+      fill: #f0b27a;
+      stroke: #152236;
+      stroke-width: 2;
+    }
+
+    .motion-mark {
+      fill: none;
+      stroke: #8fa0b5;
+      stroke-width: 2;
+      stroke-linecap: round;
+      opacity: 0.9;
+      animation: motionFade 1.4s ease-in-out infinite;
+    }
+
+    .model-box {
+      padding: 16px;
+    }
+
+    .model-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      color: var(--blue);
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .num {
+      display: inline-grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      color: white;
+      background: var(--blue);
+      font-weight: 900;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: var(--radius);
+      background: white;
+      font-size: 0.95rem;
+    }
+
+    .data-table th,
+    .data-table td {
+      padding: 12px;
+      border: 1px solid var(--line);
+      text-align: left;
+    }
+
+    .data-table th {
+      color: var(--green);
+      background: var(--green-soft);
+      text-transform: uppercase;
+    }
+
+    .data-table td:last-child {
+      font-weight: 900;
+      text-align: right;
+    }
+
+    .quiz-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .quiz-card {
+      position: relative;
+      padding: 18px;
+      min-height: 188px;
+      border-color: var(--accent);
+      --accent: var(--blue);
+      --accent-soft: var(--blue-soft);
+    }
+
+    .quiz-card.orange {
+      --accent: var(--orange);
+      --accent-soft: var(--orange-soft);
+    }
+
+    .quiz-card.green {
+      --accent: var(--green);
+      --accent-soft: var(--green-soft);
+    }
+
+    .quiz-card.purple {
+      --accent: var(--purple);
+      --accent-soft: var(--purple-soft);
+    }
+
+    .quiz-card.pink {
+      --accent: var(--pink);
+      --accent-soft: var(--pink-soft);
+    }
+
+    .quiz-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      color: var(--accent);
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .quiz-head .num {
+      background: var(--accent);
+    }
+
+    .formula {
+      margin-bottom: 12px;
+      font-family: Cambria, "Times New Roman", serif;
+      font-size: 1.24rem;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .answer-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .answer-row label {
+      min-width: 34px;
+      font-family: Cambria, "Times New Roman", serif;
+      font-size: 1.25rem;
+      font-weight: 900;
+    }
+
+    input[type="number"],
+    input[type="text"] {
+      min-width: 0;
+      width: 100%;
+      padding: 11px 12px;
+      border: 2px dashed var(--accent);
+      border-radius: 8px;
+      color: var(--ink);
+      background: #ffffff;
+      font: inherit;
+      font-weight: 800;
+    }
+
+    input:focus {
+      outline: 3px solid rgba(23, 78, 166, 0.18);
+      border-style: solid;
+    }
+
+    .unit {
+      color: var(--muted);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .feedback {
+      min-height: 22px;
+      margin-top: 9px;
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+
+    .feedback.ok {
+      color: var(--green);
+    }
+
+    .feedback.bad {
+      color: var(--red);
+    }
+
+    .wide {
+      grid-column: span 2;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 18px 0;
+    }
+
+    button {
+      border: 0;
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: white;
+      background: var(--blue);
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 10px 20px rgba(23, 78, 166, 0.22);
+    }
+
+    button.secondary {
+      color: var(--blue);
+      background: var(--blue-soft);
+      box-shadow: none;
+    }
+
+    .summary {
+      flex: 1 1 240px;
+      align-self: center;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .solution {
+      display: none;
+      margin-top: 12px;
+      padding: 14px;
+      border-radius: var(--radius);
+      background: var(--accent-soft);
+      color: var(--ink);
+    }
+
+    .solution.visible {
+      display: block;
+    }
+
+    .solution ol {
+      margin: 0;
+      padding-left: 22px;
+    }
+
+    .solution li {
+      margin: 6px 0;
+    }
+
+    .verify-card,
+    .memory-card {
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .verify-card h2,
+    .memory-card h2 {
+      margin-bottom: 12px;
+      color: var(--blue);
+      font-size: 1.2rem;
+    }
+
+    .verify-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+
+    .verify-table th,
+    .verify-table td {
+      padding: 9px;
+      border: 1px solid #9cbff0;
+      text-align: center;
+    }
+
+    .verify-table th {
+      background: var(--blue-soft);
+    }
+
+    .memory-card {
+      background: linear-gradient(145deg, #fff9df, #ffffff);
+    }
+
+    .memory-card ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .memory-card li {
+      margin: 6px 0;
+    }
+
+    .locked-note {
+      margin-top: 10px;
+      padding: 12px;
+      border: 1px dashed #efbd68;
+      border-radius: var(--radius);
+      background: #fffaf0;
+      color: #69400f;
+      font-weight: 800;
+    }
+
+    @keyframes ropeSwing {
+      0%,
+      100% {
+        transform: rotate(1.1deg);
+      }
+
+      50% {
+        transform: rotate(-1.5deg);
+      }
+    }
+
+    @keyframes jumperBob {
+      0%,
+      100% {
+        transform: translateY(-8px) rotate(5deg);
+      }
+
+      50% {
+        transform: translateY(16px) rotate(-4deg);
+      }
+    }
+
+    @keyframes motionFade {
+      0%,
+      100% {
+        opacity: 0.35;
+      }
+
+      50% {
+        opacity: 1;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .rope-line,
+      .jumper-group,
+      .motion-mark {
+        animation: none;
+      }
+    }
+
+    @media (max-width: 980px) {
+      .top-grid,
+      .dashboard,
+      .quiz-grid,
+      .exercise-nav {
+        grid-template-columns: 1fr;
+      }
+
+      .wide {
+        grid-column: span 1;
+      }
+    }
+
+    @media (max-width: 560px) {
+      main {
+        width: min(100% - 18px, 1240px);
+        padding-top: 16px;
+      }
+
+      .answer-row {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .diagram {
+        min-height: 350px;
+      }
+
+      .diagram-badge {
+        font-size: 0.86rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="top-grid">
+      <div>
+        <h1>Frecuencia natural <span>de un saltador</span></h1>
+        <nav class="exercise-nav" aria-label="Navegación de ejercicios">
+          <a class="exercise-link" href="index.html">
+            <strong>Ejercicio 1</strong>
+            <span>Constante original del resorte.</span>
+          </a>
+          <a class="exercise-link" href="ejercicio2.html">
+            <strong>Ejercicio 2</strong>
+            <span>MAS con fase inicial.</span>
+          </a>
+          <a class="exercise-link current" href="quiz-saltador.html" aria-current="page">
+            <strong>Ejercicio 3</strong>
+            <span>Resuelve y comprueba tus respuestas.</span>
+          </a>
+        </nav>
+      </div>
+      <aside class="statement">
+        Un saltador con un peso de <strong>160 lb</strong> sujeta un extremo de una cuerda
+        elástica de <strong>200 pies</strong> de largo con rigidez de
+        <strong>10 lb/pulg</strong> a un puente y el otro extremo a sí mismo. Suponiendo que
+        el puente es rígido, determine el movimiento vibratorio del saltador con respecto
+        a su posición de equilibrio estático.
+      </aside>
+    </section>
+
+    <section class="dashboard">
+      <div>
+        <article class="panel">
+          <div class="panel-title">Esquema del problema</div>
+          <div class="diagram" aria-label="Puente con saltador y cuerda elástica">
+            <div class="diagram-badge">Esquema del problema</div>
+            <svg class="bridge-svg" viewBox="0 0 560 410" role="img" aria-label="Puente con saltador sujeto a una cuerda de 200 pies">
+              <defs>
+                <marker id="lengthArrow" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+                  <path d="M0,0 L8,3 L0,6 Z" fill="#1f2f40" />
+                </marker>
+                <marker id="lengthArrowBack" markerWidth="9" markerHeight="9" refX="1" refY="3" orient="auto">
+                  <path d="M8,0 L0,3 L8,6 Z" fill="#1f2f40" />
+                </marker>
+              </defs>
+
+              <path class="bridge-cable" d="M28 95 C125 5 196 98 280 98 C364 98 435 5 532 95" />
+              <line class="bridge-deck" x1="28" y1="104" x2="532" y2="104" />
+              <rect class="bridge-tower" x="135" y="40" width="10" height="94" />
+              <rect class="bridge-tower" x="415" y="40" width="10" height="94" />
+
+              <g aria-hidden="true">
+                <line class="bridge-hanger" x1="82" y1="58" x2="82" y2="104" />
+                <line class="bridge-hanger" x1="102" y1="42" x2="102" y2="104" />
+                <line class="bridge-hanger" x1="122" y1="31" x2="122" y2="104" />
+                <line class="bridge-hanger" x1="160" y1="56" x2="160" y2="104" />
+                <line class="bridge-hanger" x1="182" y1="70" x2="182" y2="104" />
+                <line class="bridge-hanger" x1="204" y1="81" x2="204" y2="104" />
+                <line class="bridge-hanger" x1="226" y1="89" x2="226" y2="104" />
+                <line class="bridge-hanger" x1="248" y1="95" x2="248" y2="104" />
+                <line class="bridge-hanger" x1="312" y1="95" x2="312" y2="104" />
+                <line class="bridge-hanger" x1="334" y1="89" x2="334" y2="104" />
+                <line class="bridge-hanger" x1="356" y1="81" x2="356" y2="104" />
+                <line class="bridge-hanger" x1="378" y1="70" x2="378" y2="104" />
+                <line class="bridge-hanger" x1="400" y1="56" x2="400" y2="104" />
+                <line class="bridge-hanger" x1="438" y1="31" x2="438" y2="104" />
+                <line class="bridge-hanger" x1="458" y1="42" x2="458" y2="104" />
+                <line class="bridge-hanger" x1="478" y1="58" x2="478" y2="104" />
+              </g>
+
+              <rect class="bridge-anchor" x="12" y="114" width="28" height="36" rx="3" transform="rotate(-32 26 132)" />
+              <rect class="bridge-anchor" x="520" y="114" width="28" height="36" rx="3" transform="rotate(32 534 132)" />
+              <rect class="bridge-weight" x="115" y="160" width="34" height="28" rx="2" />
+              <line class="bridge-hanger" x1="132" y1="104" x2="132" y2="160" />
+              <rect class="bridge-weight" x="410" y="160" width="34" height="28" rx="2" />
+              <line class="bridge-hanger" x1="427" y1="104" x2="427" y2="160" />
+
+              <line class="rope-line" x1="280" y1="104" x2="280" y2="318" />
+              <line class="length-arrow" x1="344" y1="106" x2="344" y2="326" />
+              <line class="length-guide" x1="344" y1="326" x2="500" y2="326" />
+              <text class="length-text" x="370" y="214">Longitud</text>
+              <text class="length-text" x="356" y="238">no alargada:</text>
+              <text class="length-number" x="390" y="264">200 pies</text>
+
+              <g class="jumper-group">
+                <path class="jumper-pants" d="M262 324 L282 340 L306 382 L292 390 L268 354 L248 338 Z" />
+                <path class="jumper-shirt" d="M244 284 C262 276 283 286 289 306 L274 320 C260 307 246 302 235 303 Z" />
+                <circle class="jumper-skin" cx="244" cy="276" r="11" />
+                <path class="jumper-skin" d="M236 304 C219 305 207 298 202 291" />
+                <path class="jumper-skin" d="M245 307 C226 314 214 312 203 304" />
+                <path class="jumper-pants" d="M291 386 L303 398" />
+                <path class="jumper-pants" d="M270 354 L254 387" />
+                <path class="motion-mark" d="M226 334 C215 340 208 348 204 358" />
+                <path class="motion-mark" d="M308 366 C318 372 325 379 330 388" />
+              </g>
+            </svg>
+          </div>
+        </article>
+
+        <article class="panel model-box">
+          <div class="model-title"><span class="num">1</span> Datos del problema</div>
+          <table class="data-table">
+            <tr>
+              <th>Magnitud</th>
+              <th>Valor</th>
+            </tr>
+            <tr>
+              <td>Peso del saltador W</td>
+              <td>160 lb</td>
+            </tr>
+            <tr>
+              <td>Rigidez de la cuerda k</td>
+              <td>10 lb/pulg</td>
+            </tr>
+            <tr>
+              <td>Longitud no alargada L</td>
+              <td>200 pies</td>
+            </tr>
+            <tr>
+              <td>Gravedad g</td>
+              <td>386.4 pulg/s²</td>
+            </tr>
+          </table>
+          <p class="locked-note">
+            Trabaja en unidades consistentes: pulgadas, segundos y libras.
+          </p>
+        </article>
+      </div>
+
+      <div>
+        <article class="quiz-grid" aria-label="Quiz de pasos para la solución">
+          <section class="quiz-card purple" data-key="m">
+            <div class="quiz-head"><span class="num">2</span> Masa del saltador</div>
+            <p>A partir del peso:</p>
+            <div class="formula">m = W / g</div>
+            <div class="answer-row">
+              <label for="answer-m">m =</label>
+              <input id="answer-m" type="number" step="0.0001" />
+              <span class="unit">lb·s²/in</span>
+            </div>
+            <div class="feedback" id="feedback-m"></div>
+          </section>
+
+          <section class="quiz-card orange" data-key="k">
+            <div class="quiz-head"><span class="num">3</span> Rigidez de la cuerda</div>
+            <p>Convierte la rigidez si es necesario.</p>
+            <div class="formula">k = 10 lb/pulg</div>
+            <div class="answer-row">
+              <label for="answer-k">k =</label>
+              <input id="answer-k" type="number" step="0.01" />
+              <span class="unit">lb/in</span>
+            </div>
+            <div class="feedback" id="feedback-k"></div>
+          </section>
+
+          <section class="quiz-card" data-key="v">
+            <div class="quiz-head"><span class="num">4</span> Velocidad del saltador</div>
+            <p>Al caer 200 pies desde el reposo:</p>
+            <div class="formula">v = √(2gh)</div>
+            <div class="answer-row">
+              <label for="answer-v">v =</label>
+              <input id="answer-v" type="number" step="0.01" />
+              <span class="unit">in/s</span>
+            </div>
+            <div class="feedback" id="feedback-v"></div>
+          </section>
+
+          <section class="quiz-card green" data-key="x0">
+            <div class="quiz-head"><span class="num">5</span> Equilibrio estático</div>
+            <p>En equilibrio estático:</p>
+            <div class="formula">mg = kx₀</div>
+            <div class="answer-row">
+              <label for="answer-x0">x₀ =</label>
+              <input id="answer-x0" type="number" step="0.01" />
+              <span class="unit">in</span>
+            </div>
+            <div class="feedback" id="feedback-x0"></div>
+          </section>
+
+          <section class="quiz-card pink" data-key="xdot0">
+            <div class="quiz-head"><span class="num">6</span> Velocidad inicial</div>
+            <p>Al pasar por el punto donde la cuerda empieza a estirarse:</p>
+            <div class="formula">ẋ₀ = v</div>
+            <div class="answer-row">
+              <label for="answer-xdot0">ẋ₀ =</label>
+              <input id="answer-xdot0" type="number" step="0.01" />
+              <span class="unit">in/s</span>
+            </div>
+            <div class="feedback" id="feedback-xdot0"></div>
+          </section>
+
+          <section class="quiz-card" data-key="omega">
+            <div class="quiz-head"><span class="num">7</span> Frecuencia angular</div>
+            <p>Para un sistema masa-resorte:</p>
+            <div class="formula">ωₙ = √(k / m)</div>
+            <div class="answer-row">
+              <label for="answer-omega">ωₙ =</label>
+              <input id="answer-omega" type="number" step="0.0001" />
+              <span class="unit">rad/s</span>
+            </div>
+            <div class="feedback" id="feedback-omega"></div>
+          </section>
+
+          <section class="quiz-card orange" data-key="amplitude">
+            <div class="quiz-head"><span class="num">8</span> Amplitud</div>
+            <p>Combina desplazamiento inicial y velocidad inicial:</p>
+            <div class="formula">A₀ = √(x₀² + (ẋ₀ / ωₙ)²)</div>
+            <div class="answer-row">
+              <label for="answer-amplitude">A₀ =</label>
+              <input id="answer-amplitude" type="number" step="0.01" />
+              <span class="unit">in</span>
+            </div>
+            <div class="feedback" id="feedback-amplitude"></div>
+          </section>
+
+          <section class="quiz-card purple" data-key="phase">
+            <div class="quiz-head"><span class="num">9</span> Fase inicial</div>
+            <p>Usando la convención de la referencia:</p>
+            <div class="formula">φ₀ = tan⁻¹(ẋ₀ / (x₀ωₙ))</div>
+            <div class="answer-row">
+              <label for="answer-phase">φ₀ =</label>
+              <input id="answer-phase" type="number" step="0.0001" />
+              <span class="unit">rad</span>
+            </div>
+            <div class="feedback" id="feedback-phase"></div>
+          </section>
+
+          <section class="quiz-card pink wide" data-key="expression">
+            <div class="quiz-head"><span class="num">10</span> Expresión del movimiento</div>
+            <p>Completa la respuesta libre sin amortiguamiento:</p>
+            <div class="formula">x(t) = A₀ sin(ωₙt + φ₀)</div>
+            <div class="answer-row">
+              <label for="answer-expression">x(t)=</label>
+              <input id="answer-expression" type="text" placeholder="Ej. 277.59 sin(4.914t + 1.513)" />
+              <span class="unit">in</span>
+            </div>
+            <div class="feedback" id="feedback-expression"></div>
+          </section>
+        </article>
+
+        <div class="actions">
+          <button id="checkBtn" type="button">Comprobar respuestas</button>
+          <button id="solutionBtn" class="secondary" type="button">Mostrar procedimiento</button>
+          <button id="resetBtn" class="secondary" type="button">Reiniciar</button>
+          <div class="summary" id="summary">Completa las casillas y comprueba tu avance.</div>
+        </div>
+
+        <section class="quiz-card green solution" id="solution">
+          <div class="quiz-head"><span class="num">✓</span> Procedimiento</div>
+          <ol>
+            <li>Convierte la altura: h = 200 pies = 2400 in.</li>
+            <li>m = W/g = 160/386.4 = 0.4141 lb·s²/in.</li>
+            <li>v = √(2gh) = √(2(386.4)(2400)) = 1361.88 in/s.</li>
+            <li>x₀ = W/k = 160/10 = 16.00 in.</li>
+            <li>ωₙ = √(k/m) = √(10/0.4141) = 4.914 rad/s.</li>
+            <li>A₀ = √(16² + (1361.88/4.914)²) = 277.59 in.</li>
+            <li>φ₀ = tan⁻¹(1361.88/(16·4.914)) = 1.513 rad.</li>
+          </ol>
+        </section>
+
+        <section class="verify-card">
+          <h2>Verificación final</h2>
+          <table class="verify-table">
+            <tr>
+              <th>Magnitud</th>
+              <th>Resultado esperado</th>
+              <th>Unidad</th>
+            </tr>
+            <tr>
+              <td>m</td>
+              <td>0.4141</td>
+              <td>lb·s²/in</td>
+            </tr>
+            <tr>
+              <td>k</td>
+              <td>10.00</td>
+              <td>lb/in</td>
+            </tr>
+            <tr>
+              <td>v</td>
+              <td>1361.88</td>
+              <td>in/s</td>
+            </tr>
+            <tr>
+              <td>x₀</td>
+              <td>16.00</td>
+              <td>in</td>
+            </tr>
+            <tr>
+              <td>ωₙ</td>
+              <td>4.914</td>
+              <td>rad/s</td>
+            </tr>
+            <tr>
+              <td>A₀</td>
+              <td>277.59</td>
+              <td>in</td>
+            </tr>
+            <tr>
+              <td>φ₀</td>
+              <td>1.513</td>
+              <td>rad</td>
+            </tr>
+          </table>
+        </section>
+
+        <section class="memory-card">
+          <h2>Recuerda</h2>
+          <ul>
+            <li>El equilibrio estático ocurre cuando mg = kx₀.</li>
+            <li>La velocidad máxima se alcanza al pasar por el equilibrio.</li>
+            <li>El movimiento se modela sin amortiguamiento.</li>
+          </ul>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Convención tomada de la referencia visual: x(t) = A0 sin(wn*t + phi0).
+    const constants = {
+      weight: 160,
+      stiffness: 10,
+      heightIn: 200 * 12,
+      gravity: 386.4
+    };
+
+    const expected = {
+      m: constants.weight / constants.gravity,
+      k: constants.stiffness,
+      v: Math.sqrt(2 * constants.gravity * constants.heightIn),
+      x0: constants.weight / constants.stiffness
+    };
+
+    expected.xdot0 = expected.v;
+    expected.omega = Math.sqrt(expected.k / expected.m);
+    expected.amplitude = Math.sqrt(expected.x0 ** 2 + (expected.xdot0 / expected.omega) ** 2);
+    expected.phase = Math.atan(expected.xdot0 / (expected.x0 * expected.omega));
+
+    const checks = {
+      m: { tolerance: 0.002, label: "m" },
+      k: { tolerance: 0.02, label: "k" },
+      v: { tolerance: 1.0, label: "v" },
+      x0: { tolerance: 0.05, label: "x0" },
+      xdot0: { tolerance: 1.0, label: "xdot0" },
+      omega: { tolerance: 0.02, label: "omega" },
+      amplitude: { tolerance: 0.5, label: "amplitude" },
+      phase: { tolerance: 0.02, label: "phase" }
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const format = (value, decimals) =>
+      Number(value).toLocaleString("es-MX", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      });
+
+    function checkNumber(key) {
+      const input = $(`answer-${key}`);
+      const feedback = $(`feedback-${key}`);
+      const value = Number(input.value);
+
+      if (input.value.trim() === "" || Number.isNaN(value)) {
+        feedback.textContent = "Escribe una respuesta.";
+        feedback.className = "feedback bad";
+        return false;
+      }
+
+      const difference = Math.abs(value - expected[key]);
+      const ok = difference <= checks[key].tolerance;
+      feedback.textContent = ok
+        ? "Correcto."
+        : `Revisa: está fuera del margen esperado.`;
+      feedback.className = ok ? "feedback ok" : "feedback bad";
+      return ok;
+    }
+
+    function checkExpression() {
+      const input = $("answer-expression");
+      const feedback = $("feedback-expression");
+      const value = input.value.toLowerCase().replace(/\s+/g, "");
+      const hasA = /277(\.|,)?[0-9]*/.test(value);
+      const hasOmega = /4(\.|,)?91/.test(value);
+      const hasPhase = /1(\.|,)?51/.test(value);
+      const hasSin = value.includes("sin");
+      const ok = hasA && hasOmega && hasPhase && hasSin;
+
+      if (!value) {
+        feedback.textContent = "Escribe la expresión del movimiento.";
+        feedback.className = "feedback bad";
+        return false;
+      }
+
+      feedback.textContent = ok
+        ? "Correcto: contiene A0, ωn y φ0."
+        : "Incluye amplitud, seno, frecuencia angular y fase.";
+      feedback.className = ok ? "feedback ok" : "feedback bad";
+      return ok;
+    }
+
+    $("checkBtn").addEventListener("click", () => {
+      const keys = Object.keys(checks);
+      const correctNumbers = keys.filter(checkNumber).length;
+      const expressionOk = checkExpression();
+      const total = keys.length + 1;
+      const correct = correctNumbers + (expressionOk ? 1 : 0);
+      $("summary").textContent = `Resultado: ${correct} de ${total} respuestas correctas.`;
+    });
+
+    $("solutionBtn").addEventListener("click", () => {
+      const solution = $("solution");
+      solution.classList.toggle("visible");
+      $("solutionBtn").textContent = solution.classList.contains("visible")
+        ? "Ocultar procedimiento"
+        : "Mostrar procedimiento";
+    });
+
+    $("resetBtn").addEventListener("click", () => {
+      [...document.querySelectorAll("input")].forEach((input) => {
+        input.value = "";
+      });
+      [...document.querySelectorAll(".feedback")].forEach((feedback) => {
+        feedback.textContent = "";
+        feedback.className = "feedback";
+      });
+      $("summary").textContent = "Completa las casillas y comprueba tu avance.";
+    });
+  </script>
+</body>
+</html>
