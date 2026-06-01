@@ -256,6 +256,48 @@
       font-weight: 800;
     }
 
+    .exercise-nav {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .exercise-link {
+      display: block;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fbfdff;
+      color: var(--ink);
+      text-decoration: none;
+      transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    .exercise-link:hover,
+    .exercise-link:focus {
+      border-color: rgba(63, 125, 198, 0.55);
+      box-shadow: 0 10px 22px rgba(41, 68, 96, 0.12);
+      transform: translateY(-2px);
+      outline: none;
+    }
+
+    .exercise-link.current {
+      background: var(--blue-soft);
+      border-color: rgba(63, 125, 198, 0.5);
+    }
+
+    .exercise-link strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #285f9f;
+    }
+
+    .exercise-link span {
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
     .diagram-side {
       display: grid;
       gap: 12px;
@@ -616,7 +658,8 @@
       .formula-grid,
       .result-grid,
       .diagram,
-      .diagram-results {
+      .diagram-results,
+      .exercise-nav {
         grid-template-columns: 1fr;
       }
 
@@ -679,6 +722,20 @@
           <strong>2 cm</strong>, determine: (a) la amplitud, (b) la velocidad inicial,
           (c) la aceleración máxima y (d) el ángulo de fase.
         </div>
+        <nav class="exercise-nav" aria-label="Navegación de ejercicios">
+          <a class="exercise-link" href="index.html">
+            <strong>Ejercicio 1</strong>
+            <span>Constante original del resorte.</span>
+          </a>
+          <a class="exercise-link current" href="ejercicio2.html" aria-current="page">
+            <strong>Ejercicio 2</strong>
+            <span>Amplitud, velocidad inicial, aceleración y fase.</span>
+          </a>
+          <a class="exercise-link" href="quiz-saltador.html">
+            <strong>Ejercicio 3</strong>
+            <span>Frecuencia natural con respuestas comprobables.</span>
+          </a>
+        </nav>
       </div>
 
       <aside class="oscillator" aria-label="Diagrama dinámico de oscilador masa-resorte">
