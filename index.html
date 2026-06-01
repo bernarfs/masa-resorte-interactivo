@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema masa-resorte | Actividad interactiva</title>
+  <style>
+    :root {
+      --bg: #f5f8fb;
+      --paper: #ffffff;
+      --ink: #203040;
+      --muted: #5f7185;
+      --line: #d8e2ee;
+      --blue: #4278c4;
+      --blue-soft: #e8f1ff;
+      --green: #2d9b73;
+      --green-soft: #e6f6ef;
+      --orange: #d67b22;
+      --orange-soft: #fff2df;
+      --red: #c94e4e;
+      --shadow: 0 18px 45px rgba(41, 68, 96, 0.12);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top left, rgba(66, 120, 196, 0.12), transparent 34rem),
+        linear-gradient(180deg, #f8fbff 0%, var(--bg) 60%, #eef4f8 100%);
+      color: var(--ink);
+      font-family: "Segoe UI", Arial, sans-serif;
+      line-height: 1.5;
+    }
+
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 42px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 24px;
+      align-items: stretch;
+      margin-bottom: 24px;
+    }
+
+    .hero-copy,
+    .simulation-panel,
+    .section,
+    .result-card {
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(216, 226, 238, 0.9);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-copy {
+      padding: 28px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--blue-soft);
+      color: #275b9f;
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      line-height: 1.15;
+    }
+
+    h1 {
+      max-width: 780px;
+      font-size: clamp(2rem, 4vw, 4rem);
+      letter-spacing: 0;
+    }
+
+    h2 {
+      font-size: 1.35rem;
+    }
+
+    h3 {
+      font-size: 1rem;
+      color: #2c4056;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    .lead {
+      max-width: 700px;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 1.08rem;
+    }
+
+    .statement {
+      margin-top: 20px;
+      padding: 18px;
+      border-left: 5px solid var(--blue);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      background: #f6f9fd;
+    }
+
+    .simulation-panel {
+      padding: 22px;
+      overflow: hidden;
+    }
+
+    .spring-scene {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-height: 275px;
+      border-radius: var(--radius);
+      background:
+        linear-gradient(90deg, rgba(216, 226, 238, 0.72) 1px, transparent 1px) 0 0 / 28px 28px,
+        linear-gradient(180deg, rgba(216, 226, 238, 0.72) 1px, transparent 1px) 0 0 / 28px 28px,
+        #fbfdff;
+      border: 1px solid var(--line);
+    }
+
+    .wall {
+      position: absolute;
+      left: 20px;
+      top: 48px;
+      bottom: 48px;
+      width: 18px;
+      border-radius: 4px;
+      background: repeating-linear-gradient(
+        135deg,
+        #7d8da0,
+        #7d8da0 8px,
+        #9facbd 8px,
+        #9facbd 16px
+      );
+    }
+
+    .spring-wrap {
+      width: min(320px, 72vw);
+      transform: translateX(16px);
+    }
+
+    .mass {
+      position: absolute;
+      right: clamp(30px, 9vw, 66px);
+      top: 93px;
+      width: 92px;
+      height: 92px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: linear-gradient(145deg, #ffc86b, #f1a33e);
+      border: 3px solid #b56d1e;
+      color: #51340c;
+      font-weight: 800;
+      box-shadow: 0 12px 22px rgba(181, 109, 30, 0.22);
+    }
+
+    .floor {
+      position: absolute;
+      left: 42px;
+      right: 30px;
+      bottom: 52px;
+      height: 4px;
+      border-radius: 999px;
+      background: #b8c7d8;
+    }
+
+    .explain-arrow {
+      position: absolute;
+      right: 52px;
+      bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--orange);
+      font-weight: 800;
+    }
+
+    .arrow-line {
+      width: 74px;
+      height: 3px;
+      border-radius: 999px;
+      background: var(--orange);
+      position: relative;
+    }
+
+    .arrow-line::after {
+      content: "";
+      position: absolute;
+      right: -2px;
+      top: -5px;
+      border-left: 11px solid var(--orange);
+      border-top: 7px solid transparent;
+      border-bottom: 7px solid transparent;
+    }
+
+    .tag {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: var(--orange-soft);
+      color: #8a4e12;
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 0.84fr 1.16fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .section {
+      padding: 22px;
+      margin-bottom: 24px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .mini-icon {
+      display: inline-grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      flex: 0 0 auto;
+      border-radius: 8px;
+      background: var(--blue-soft);
+      color: var(--blue);
+      font-weight: 900;
+    }
+
+    .data-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .data-item,
+    .unknown,
+    .formula,
+    .step,
+    .verification-line,
+    .note {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fbfdff;
+    }
+
+    .data-item,
+    .unknown {
+      padding: 14px;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 0.88rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .value {
+      margin-top: 4px;
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+
+    .controls {
+      display: grid;
+      gap: 16px;
+    }
+
+    .control {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fbfdff;
+    }
+
+    .control-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--blue);
+    }
+
+    input[type="number"] {
+      width: 120px;
+      padding: 8px 10px;
+      border: 1px solid #c5d2e0;
+      border-radius: 8px;
+      color: var(--ink);
+      font: inherit;
+      font-weight: 700;
+      text-align: right;
+    }
+
+    input[type="number"]:focus {
+      outline: 3px solid rgba(66, 120, 196, 0.18);
+      border-color: var(--blue);
+    }
+
+    .formula-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .formula {
+      padding: 16px;
+      text-align: center;
+    }
+
+    .math {
+      font-family: Cambria, "Times New Roman", serif;
+      font-size: 1.45rem;
+      font-weight: 700;
+    }
+
+    .formula small {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+    }
+
+    .step-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      padding: 14px;
+    }
+
+    .step-number {
+      width: 31px;
+      height: 31px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--blue);
+      color: white;
+      font-weight: 900;
+    }
+
+    .step strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #203449;
+    }
+
+    .step .math {
+      display: block;
+      margin-top: 6px;
+      color: #203449;
+      font-size: 1.18rem;
+    }
+
+    .why-box {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+      padding: 14px;
+      border: 1px solid #f0cf9e;
+      border-radius: var(--radius);
+      background: var(--orange-soft);
+      color: #74450f;
+    }
+
+    .why-icon {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #ffd99e;
+      font-weight: 900;
+    }
+
+    .result-card {
+      padding: 22px;
+      border-color: rgba(45, 155, 115, 0.35);
+      background: linear-gradient(145deg, #ffffff, var(--green-soft));
+    }
+
+    .result-value {
+      margin-top: 8px;
+      color: #17664b;
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .result-meta {
+      margin-top: 10px;
+      color: #376b58;
+    }
+
+    .validation {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+      padding: 9px 11px;
+      border-radius: 999px;
+      background: var(--green);
+      color: white;
+      font-weight: 800;
+    }
+
+    .validation.warning {
+      background: var(--red);
+    }
+
+    .verification-line {
+      padding: 14px;
+      margin-top: 12px;
+    }
+
+    .verification-toggle {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 10px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .note {
+      margin-top: 14px;
+      padding: 13px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    svg {
+      max-width: 100%;
+      overflow: visible;
+    }
+
+    .spring-path {
+      fill: none;
+      stroke: #4278c4;
+      stroke-width: 8;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+    }
+
+    @media (max-width: 900px) {
+      .hero,
+      .layout,
+      .formula-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-copy {
+        padding: 22px;
+      }
+
+      .simulation-panel {
+        order: -1;
+      }
+    }
+
+    @media (max-width: 560px) {
+      main {
+        width: min(100% - 20px, 1180px);
+        padding-top: 14px;
+      }
+
+      .section,
+      .result-card,
+      .simulation-panel {
+        padding: 16px;
+      }
+
+      .control-row {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      input[type="number"] {
+        width: 100%;
+        text-align: left;
+      }
+
+      .mass {
+        right: 22px;
+        width: 76px;
+        height: 76px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero" aria-labelledby="page-title">
+      <div class="hero-copy">
+        <div class="eyebrow">Actividad interactiva | Sistema masa-resorte</div>
+        <h1 id="page-title">Encuentra la constante de resorte original</h1>
+        <p class="lead">
+          Explora cómo una reducción de rigidez cambia la frecuencia natural y sigue el despeje
+          paso a paso hasta obtener la constante original del resorte.
+        </p>
+        <div class="statement">
+          <strong>Enunciado:</strong> Un sistema masa-resorte tiene una frecuencia natural original
+          de <strong>10 Hz</strong>. La constante del resorte se reduce en <strong>800 N/m</strong>
+          y la frecuencia disminuye <strong>45%</strong>. Determina la constante de resorte original
+          <strong>k</strong>.
+        </div>
+      </div>
+
+      <aside class="simulation-panel" aria-label="Ilustración de sistema masa-resorte">
+        <div class="spring-scene">
+          <div class="wall" aria-hidden="true"></div>
+          <svg class="spring-wrap" viewBox="0 0 360 120" role="img" aria-label="Resorte unido a una masa">
+            <path class="spring-path" d="M0 60 H32 L48 24 L80 96 L112 24 L144 96 L176 24 L208 96 L240 24 L272 96 L304 60 H360" />
+          </svg>
+          <div class="mass">m</div>
+          <div class="floor" aria-hidden="true"></div>
+          <div class="explain-arrow">
+            <span>menor k</span>
+            <span class="arrow-line" aria-hidden="true"></span>
+          </div>
+        </div>
+        <div class="tag">Si el resorte se vuelve menos rígido, el sistema oscila más lento.</div>
+      </aside>
+    </section>
+
+    <section class="layout">
+      <div>
+        <article class="section" aria-labelledby="datos-title">
+          <div class="section-header">
+            <h2 id="datos-title">Datos e incógnita</h2>
+            <span class="mini-icon">i</span>
+          </div>
+          <div class="data-grid">
+            <div class="data-item">
+              <div class="label">Frecuencia natural original</div>
+              <div class="value">f<sub>n</sub> = <span id="freqHz">10.00</span> Hz</div>
+            </div>
+            <div class="data-item">
+              <div class="label">Reducción de la constante</div>
+              <div class="value">Δk = <span id="deltaKData">800.00</span> N/m</div>
+            </div>
+            <div class="data-item">
+              <div class="label">Disminución de frecuencia</div>
+              <div class="value"><span id="dropData">45.00</span>%</div>
+            </div>
+            <div class="unknown">
+              <div class="label">Incógnita</div>
+              <div class="value">k original = ?</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="section" aria-labelledby="controls-title">
+          <div class="section-header">
+            <h2 id="controls-title">Controles</h2>
+            <span class="mini-icon">↕</span>
+          </div>
+          <div class="controls">
+            <label class="control">
+              <span class="control-row">
+                <strong>Disminución de frecuencia</strong>
+                <input id="dropInput" type="number" min="1" max="95" step="0.1" value="45" />
+              </span>
+              <input id="dropRange" type="range" min="1" max="95" step="0.1" value="45" />
+            </label>
+            <label class="control">
+              <span class="control-row">
+                <strong>Reducción de k (N/m)</strong>
+                <input id="deltaKInput" type="number" min="1" max="10000" step="1" value="800" />
+              </span>
+              <input id="deltaKRange" type="range" min="1" max="3000" step="1" value="800" />
+            </label>
+          </div>
+          <p class="note">
+            Nota: se asume que la masa no cambia. Por eso se puede comparar directamente
+            k nueva contra k original usando el cuadrado de la razón de frecuencias.
+          </p>
+        </article>
+      </div>
+
+      <div>
+        <article class="section" aria-labelledby="formulas-title">
+          <div class="section-header">
+            <h2 id="formulas-title">Fórmulas base</h2>
+            <span class="mini-icon">√</span>
+          </div>
+          <div class="formula-grid">
+            <div class="formula">
+              <div class="math">ω<sub>n</sub> = √(k / m)</div>
+              <small>Relaciona rigidez, masa y frecuencia angular.</small>
+            </div>
+            <div class="formula">
+              <div class="math">ω<sub>n</sub> = 2πf<sub>n</sub></div>
+              <small>Convierte Hz a rad/s.</small>
+            </div>
+          </div>
+        </article>
+
+        <article class="section" aria-labelledby="steps-title">
+          <div class="section-header">
+            <h2 id="steps-title">Procedimiento paso a paso</h2>
+            <span class="mini-icon">1</span>
+          </div>
+
+          <div class="why-box">
+            <span class="why-icon">k↓</span>
+            <p>
+              Como <span class="math">ω<sub>n</sub> = √(k/m)</span>, si m permanece igual,
+              una frecuencia menor significa una constante k menor.
+            </p>
+          </div>
+
+          <div class="step-list">
+            <div class="step">
+              <div class="step-number">1</div>
+              <div>
+                <strong>Convierte la frecuencia original a rad/s</strong>
+                <span class="math">ω<sub>n</sub> = 2π(10) = <span id="omegaValue">62.832</span> rad/s</span>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-number">2</div>
+              <div>
+                <strong>Expresa la nueva frecuencia como fracción de la original</strong>
+                <span class="math">100% - <span id="dropStep">45.00</span>% = <span id="remainingPercent">55.00</span>% = <span id="ratioValue">0.55</span></span>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-number">3</div>
+              <div>
+                <strong>Eleva la razón al cuadrado porque k depende de ω²</strong>
+                <span class="math">(k - <span id="deltaKStepA">800.00</span>) / k = (<span id="ratioValueA">0.55</span>)²</span>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-number">4</div>
+              <div>
+                <strong>Despeja la ecuación</strong>
+                <span class="math">1 - <span id="deltaKStepB">800.00</span>/k = <span id="ratioSquared">0.3025</span></span>
+                <span class="math"><span id="deltaKStepC">800.00</span>/k = 1 - <span id="ratioSquaredB">0.3025</span> = <span id="denominatorValue">0.6975</span></span>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-number">5</div>
+              <div>
+                <strong>Calcula la constante original</strong>
+                <span class="math">k = <span id="deltaKStepD">800.00</span> / <span id="denominatorValueB">0.6975</span> = <span id="kStep">1146.95</span> N/m</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="result-card" aria-labelledby="result-title">
+          <h2 id="result-title">Resultado final</h2>
+          <div class="result-value">k = <span id="kFinal">1146.95</span> N/m</div>
+          <p class="result-meta">
+            La nueva constante sería k - Δk = <strong><span id="newK">346.95</span> N/m</strong>.
+          </p>
+          <div id="validation" class="validation">✓ Coincide con el caso esperado</div>
+
+          <div class="verification-line">
+            <label class="verification-toggle">
+              <input id="showMassCheck" type="checkbox" />
+              Verificación opcional usando m
+            </label>
+            <div id="massCheck" class="hidden">
+              <p>
+                Con <span class="math">m = k / ω²</span>:
+                <strong>m = <span id="massValue">0.291</span> kg</strong>.
+              </p>
+              <p>
+                Luego, <span class="math">ω<sub>2</sub> = √((k - Δk)/m)</span>
+                y <strong>f<sub>2</sub> = <span id="newFreqHz">5.50</span> Hz</strong>,
+                que es <strong><span id="remainingPercentCheck">55.00</span>%</strong> de 10 Hz.
+              </p>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Suposición didáctica: la masa permanece constante antes y después de reducir k.
+    const originalFrequencyHz = 10;
+    const expectedDrop = 45;
+    const expectedDeltaK = 800;
+    const expectedK = 1146.95;
+
+    const $ = (id) => document.getElementById(id);
+    const dropInput = $("dropInput");
+    const dropRange = $("dropRange");
+    const deltaKInput = $("deltaKInput");
+    const deltaKRange = $("deltaKRange");
+    const validation = $("validation");
+    const massCheck = $("massCheck");
+
+    const format = (number, decimals = 2) =>
+      Number(number).toLocaleString("es-MX", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      });
+
+    const plain = (number, decimals = 4) =>
+      Number(number).toLocaleString("es-MX", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+        useGrouping: false
+      });
+
+    function clamp(value, min, max) {
+      return Math.min(Math.max(Number(value), min), max);
+    }
+
+    function syncPair(source, target, min, max) {
+      const value = clamp(source.value, min, max);
+      source.value = value;
+      target.value = value;
+      update();
+    }
+
+    function update() {
+      const drop = clamp(dropInput.value, 1, 95);
+      const deltaK = clamp(deltaKInput.value, 1, 10000);
+      const ratio = (100 - drop) / 100;
+      const ratioSquared = ratio * ratio;
+      const denominator = 1 - ratioSquared;
+      const k = deltaK / denominator;
+      const newK = k - deltaK;
+      const omega = 2 * Math.PI * originalFrequencyHz;
+      const mass = k / (omega * omega);
+      const newOmega = Math.sqrt(newK / mass);
+      const newFrequencyHz = newOmega / (2 * Math.PI);
+      const matchesExpected =
+        Math.abs(drop - expectedDrop) < 0.001 &&
+        Math.abs(deltaK - expectedDeltaK) < 0.001 &&
+        Math.abs(k - expectedK) < 0.01;
+
+      $("freqHz").textContent = format(originalFrequencyHz);
+      $("omegaValue").textContent = format(omega, 3);
+      $("deltaKData").textContent = format(deltaK);
+      $("dropData").textContent = format(drop);
+      $("dropStep").textContent = format(drop);
+      $("remainingPercent").textContent = format(ratio * 100);
+      $("remainingPercentCheck").textContent = format(ratio * 100);
+      $("ratioValue").textContent = plain(ratio, 2);
+      $("ratioValueA").textContent = plain(ratio, 2);
+      $("ratioSquared").textContent = plain(ratioSquared, 4);
+      $("ratioSquaredB").textContent = plain(ratioSquared, 4);
+      $("denominatorValue").textContent = plain(denominator, 4);
+      $("denominatorValueB").textContent = plain(denominator, 4);
+      $("deltaKStepA").textContent = format(deltaK);
+      $("deltaKStepB").textContent = format(deltaK);
+      $("deltaKStepC").textContent = format(deltaK);
+      $("deltaKStepD").textContent = format(deltaK);
+      $("kStep").textContent = format(k);
+      $("kFinal").textContent = format(k);
+      $("newK").textContent = format(newK);
+      $("massValue").textContent = format(mass, 3);
+      $("newFreqHz").textContent = format(newFrequencyHz);
+
+      validation.classList.toggle("warning", !matchesExpected);
+      validation.textContent = matchesExpected
+        ? "✓ Coincide con el caso esperado"
+        : "✓ Recalculado con los valores actuales";
+    }
+
+    dropInput.addEventListener("input", () => syncPair(dropInput, dropRange, 1, 95));
+    dropRange.addEventListener("input", () => syncPair(dropRange, dropInput, 1, 95));
+    deltaKInput.addEventListener("input", () => syncPair(deltaKInput, deltaKRange, 1, 10000));
+    deltaKRange.addEventListener("input", () => syncPair(deltaKRange, deltaKInput, 1, 3000));
+    $("showMassCheck").addEventListener("change", (event) => {
+      massCheck.classList.toggle("hidden", !event.target.checked);
+    });
+
+    update();
+  </script>
+</body>
+</html>
