@@ -155,6 +155,8 @@
     .spring-wrap {
       width: min(320px, 72vw);
       transform: translateX(16px);
+      transform-origin: left center;
+      animation: springPulse 1.55s ease-in-out infinite;
     }
 
     .mass {
@@ -171,6 +173,7 @@
       color: #51340c;
       font-weight: 800;
       box-shadow: 0 12px 22px rgba(181, 109, 30, 0.22);
+      animation: massPulse 1.55s ease-in-out infinite;
     }
 
     .floor {
@@ -221,6 +224,48 @@
       color: #8a4e12;
       font-size: 0.92rem;
       font-weight: 700;
+    }
+
+    .exercise-nav {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .exercise-link {
+      display: block;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fbfdff;
+      color: var(--ink);
+      text-decoration: none;
+      transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    .exercise-link:hover,
+    .exercise-link:focus {
+      border-color: rgba(66, 120, 196, 0.55);
+      box-shadow: 0 10px 22px rgba(41, 68, 96, 0.12);
+      transform: translateY(-2px);
+      outline: none;
+    }
+
+    .exercise-link.current {
+      background: var(--blue-soft);
+      border-color: rgba(66, 120, 196, 0.5);
+    }
+
+    .exercise-link strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #235b9d;
+    }
+
+    .exercise-link span {
+      color: var(--muted);
+      font-size: 0.94rem;
     }
 
     .layout {
@@ -486,10 +531,40 @@
       stroke-linecap: round;
     }
 
+    @keyframes springPulse {
+      0%,
+      100% {
+        transform: translateX(10px) scaleX(0.94);
+      }
+
+      50% {
+        transform: translateX(25px) scaleX(1.06);
+      }
+    }
+
+    @keyframes massPulse {
+      0%,
+      100% {
+        transform: translateX(-18px);
+      }
+
+      50% {
+        transform: translateX(18px);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .spring-wrap,
+      .mass {
+        animation: none;
+      }
+    }
+
     @media (max-width: 900px) {
       .hero,
       .layout,
-      .formula-grid {
+      .formula-grid,
+      .exercise-nav {
         grid-template-columns: 1fr;
       }
 
@@ -548,6 +623,16 @@
           y la frecuencia disminuye <strong>45%</strong>. Determina la constante de resorte original
           <strong>k</strong>.
         </div>
+        <nav class="exercise-nav" aria-label="Navegación de ejercicios">
+          <a class="exercise-link current" href="index.html" aria-current="page">
+            <strong>Ejercicio 1</strong>
+            <span>Constante original del resorte.</span>
+          </a>
+          <a class="exercise-link" href="ejercicio2.html">
+            <strong>Ejercicio 2</strong>
+            <span>Amplitud, velocidad inicial, aceleración y fase.</span>
+          </a>
+        </nav>
       </div>
 
       <aside class="simulation-panel" aria-label="Ilustración de sistema masa-resorte">
