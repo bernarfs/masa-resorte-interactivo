@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Oscilador armónico simple | Actividad interactiva</title>
+  <style>
+    :root {
+      --bg: #f5f8fb;
+      --paper: #ffffff;
+      --ink: #203040;
+      --muted: #607286;
+      --line: #d9e3ee;
+      --blue: #3f7dc6;
+      --blue-soft: #e8f2ff;
+      --green: #2f9b72;
+      --green-soft: #e7f6ee;
+      --orange: #d47b23;
+      --orange-soft: #fff1dd;
+      --red: #c84c4c;
+      --red-soft: #fff0f0;
+      --shadow: 0 18px 44px rgba(41, 68, 96, 0.12);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top left, rgba(63, 125, 198, 0.14), transparent 32rem),
+        linear-gradient(180deg, #f9fcff 0%, var(--bg) 62%, #eef4f8 100%);
+      color: var(--ink);
+      font-family: "Segoe UI", Arial, sans-serif;
+      line-height: 1.5;
+    }
+
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 42px;
+    }
+
+    .hero,
+    .section,
+    .result-card {
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(217, 227, 238, 0.95);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 24px;
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      margin-bottom: 10px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--blue-soft);
+      color: #285f9f;
+      font-size: 0.88rem;
+      font-weight: 800;
+    }
+
+    h1,
+    h2 {
+      margin: 0;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 4vw, 3.8rem);
+    }
+
+    h2 {
+      font-size: 1.35rem;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    .lead {
+      margin-top: 14px;
+      max-width: 740px;
+      color: var(--muted);
+      font-size: 1.08rem;
+    }
+
+    .statement {
+      margin-top: 20px;
+      padding: 18px;
+      border-left: 5px solid var(--blue);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      background: #f7faff;
+    }
+
+    .oscillator {
+      position: relative;
+      min-height: 285px;
+      --period-animation: 2s;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fbfdff;
+      overflow: hidden;
+    }
+
+    .diagram {
+      display: grid;
+      grid-template-columns: 1.45fr 0.85fr;
+      gap: 14px;
+      padding: 14px;
+      min-height: 100%;
+    }
+
+    .diagram-main {
+      min-width: 0;
+    }
+
+    .diagram-svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 8px;
+      background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+    }
+
+    .diagram-wall {
+      fill: #d2d7de;
+      stroke: #8d9baa;
+      stroke-width: 1.4;
+    }
+
+    .diagram-axis {
+      stroke: #1f2f40;
+      stroke-width: 2.2;
+      marker-end: url("#axisArrow");
+    }
+
+    .diagram-guide {
+      stroke: #9aaabc;
+      stroke-width: 1.4;
+      stroke-dasharray: 7 7;
+    }
+
+    .diagram-spring {
+      fill: none;
+      stroke: #1e2936;
+      stroke-width: 5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .diagram-connector {
+      stroke: #1e2936;
+      stroke-width: 4;
+      stroke-linecap: round;
+    }
+
+    .diagram-mass {
+      animation: diagramMass var(--period-animation) ease-in-out infinite;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    .mass-body {
+      fill: url("#massGradient");
+      stroke: #1f4f86;
+      stroke-width: 3;
+    }
+
+    .mass-label {
+      fill: #101b2b;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 26px;
+      font-weight: 800;
+    }
+
+    .red-arrow {
+      stroke: #bd1e1e;
+      stroke-width: 2.4;
+      marker-start: url("#redArrowBack");
+      marker-end: url("#redArrow");
+    }
+
+    .blue-arrow {
+      stroke: var(--blue);
+      stroke-width: 2.6;
+      marker-start: url("#blueArrowBack");
+      marker-end: url("#blueArrow");
+    }
+
+    .green-arrow {
+      stroke: var(--green);
+      stroke-width: 2.6;
+      marker-end: url("#greenArrow");
+    }
+
+    .red-result-arrow {
+      stroke: #c92d2d;
+      stroke-width: 2.6;
+      marker-end: url("#resultRedArrow");
+    }
+
+    .wave-path {
+      fill: none;
+      stroke: #2e67bb;
+      stroke-width: 2.6;
+      stroke-dasharray: 11 6;
+      animation: waveTravel 3.2s linear infinite;
+    }
+
+    .wave-guide {
+      stroke: #6d9be8;
+      stroke-width: 1.6;
+      stroke-dasharray: 7 7;
+    }
+
+    .diagram-text {
+      fill: var(--ink);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .diagram-math {
+      fill: #17263a;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 18px;
+      font-style: italic;
+      font-weight: 700;
+    }
+
+    .diagram-red {
+      fill: #a91515;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .velocity-tag {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 9px 11px;
+      border-radius: 8px;
+      background: var(--orange-soft);
+      color: #804a14;
+      font-weight: 800;
+    }
+
+    .diagram-side {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .diagram-card {
+      padding: 12px;
+      border: 1px solid #bfe1c9;
+      border-radius: 8px;
+      background: #fbfffc;
+    }
+
+    .diagram-card h3 {
+      margin: 0 0 8px;
+      color: #23733c;
+      text-align: center;
+      font-size: 1rem;
+    }
+
+    .diagram-card ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .diagram-card li {
+      margin: 7px 0;
+    }
+
+    .diagram-note {
+      padding: 12px;
+      border: 1px dashed #ebb75e;
+      border-radius: 8px;
+      background: #fffdf8;
+      color: #3b4250;
+      font-weight: 700;
+    }
+
+    .diagram-results {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.9);
+      overflow: hidden;
+    }
+
+    .diagram-result {
+      min-height: 96px;
+      padding: 12px;
+      border-right: 1px dashed #cfd9e5;
+    }
+
+    .diagram-result:last-child {
+      border-right: 0;
+    }
+
+    .diagram-result-title {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 8px;
+      font-weight: 900;
+    }
+
+    .bubble {
+      display: inline-grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid currentColor;
+      background: #f7fbff;
+      font-weight: 900;
+    }
+
+    .blue {
+      color: #215da8;
+    }
+
+    .green {
+      color: #21743e;
+    }
+
+    .red {
+      color: #912222;
+    }
+
+    .purple {
+      color: #56349a;
+    }
+
+    .diagram-answer {
+      color: #152334;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.1rem;
+      font-weight: 800;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 0.82fr 1.18fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .section,
+    .result-card {
+      padding: 22px;
+      margin-bottom: 24px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .mini-icon {
+      width: 34px;
+      height: 34px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 8px;
+      background: var(--blue-soft);
+      color: var(--blue);
+      font-weight: 900;
+    }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .data-item,
+    .control,
+    .formula,
+    .step,
+    .note {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fbfdff;
+    }
+
+    .data-item,
+    .control,
+    .formula,
+    .note {
+      padding: 14px;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 0.86rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .value {
+      margin-top: 4px;
+      font-size: 1.22rem;
+      font-weight: 900;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--blue);
+    }
+
+    input[type="number"] {
+      width: 120px;
+      padding: 8px 10px;
+      border: 1px solid #c6d3e1;
+      border-radius: 8px;
+      color: var(--ink);
+      font: inherit;
+      font-weight: 800;
+      text-align: right;
+    }
+
+    input[type="number"]:focus {
+      outline: 3px solid rgba(63, 125, 198, 0.18);
+      border-color: var(--blue);
+    }
+
+    .formula-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .formula {
+      text-align: center;
+    }
+
+    .math {
+      font-family: Cambria, "Times New Roman", serif;
+      font-size: 1.26rem;
+      font-weight: 800;
+    }
+
+    .formula small {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+    }
+
+    .why-box {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+      padding: 14px;
+      border: 1px solid #efcf9b;
+      border-radius: var(--radius);
+      background: var(--orange-soft);
+      color: #75450f;
+    }
+
+    .why-icon {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #ffd99e;
+      font-weight: 900;
+    }
+
+    .step-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      padding: 14px;
+    }
+
+    .step-number {
+      width: 31px;
+      height: 31px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--blue);
+      color: white;
+      font-weight: 900;
+    }
+
+    .step strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .step .math {
+      display: block;
+      margin-top: 6px;
+      font-size: 1.14rem;
+    }
+
+    .result-card {
+      border-color: rgba(47, 155, 114, 0.36);
+      background: linear-gradient(145deg, #ffffff, var(--green-soft));
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .result-item {
+      padding: 14px;
+      border: 1px solid rgba(47, 155, 114, 0.28);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.78);
+    }
+
+    .result-value {
+      margin-top: 6px;
+      color: #17664b;
+      font-size: 1.45rem;
+      font-weight: 900;
+      line-height: 1.15;
+    }
+
+    .validation {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+      padding: 9px 11px;
+      border-radius: 999px;
+      background: var(--green);
+      color: white;
+      font-weight: 900;
+    }
+
+    .validation.warning {
+      background: var(--red);
+    }
+
+    .invalid {
+      border-color: rgba(200, 76, 76, 0.45);
+      background: var(--red-soft);
+    }
+
+    .note {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    @keyframes diagramMass {
+      0%,
+      100% {
+        transform: translateX(28px);
+      }
+
+      50% {
+        transform: translateX(-104px);
+      }
+    }
+
+    @keyframes waveTravel {
+      to {
+        stroke-dashoffset: -68;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .diagram-mass,
+      .wave-path {
+        animation: none;
+      }
+    }
+
+    @media (max-width: 920px) {
+      .hero,
+      .layout,
+      .formula-grid,
+      .result-grid,
+      .diagram,
+      .diagram-results {
+        grid-template-columns: 1fr;
+      }
+
+      .diagram-results {
+        overflow: visible;
+      }
+
+      .diagram-result {
+        border-right: 0;
+        border-bottom: 1px dashed #cfd9e5;
+      }
+
+      .diagram-result:last-child {
+        border-bottom: 0;
+      }
+    }
+
+    @media (max-width: 560px) {
+      main {
+        width: min(100% - 20px, 1180px);
+        padding-top: 14px;
+      }
+
+      .hero,
+      .section,
+      .result-card {
+        padding: 16px;
+      }
+
+      .control-row {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      input[type="number"] {
+        width: 100%;
+        text-align: left;
+      }
+
+      .diagram {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero" aria-labelledby="page-title">
+      <div>
+        <div class="eyebrow">Actividad interactiva | Oscilador armónico simple</div>
+        <h1 id="page-title">Amplitud, velocidad inicial, aceleración máxima y fase</h1>
+        <p class="lead">
+          Usa las ecuaciones del movimiento armónico simple para reconstruir el movimiento a partir
+          de la velocidad máxima, el período y el desplazamiento inicial.
+        </p>
+        <div class="statement">
+          <strong>Enunciado:</strong> La velocidad máxima alcanzada por la masa de un oscilador
+          armónico simple es de <strong>10 cm/s</strong>, y el período de oscilación es de
+          <strong>2 s</strong>. Si la masa se suelta con un desplazamiento inicial de
+          <strong>2 cm</strong>, determine: (a) la amplitud, (b) la velocidad inicial,
+          (c) la aceleración máxima y (d) el ángulo de fase.
+        </div>
+      </div>
+
+      <aside class="oscillator" aria-label="Diagrama dinámico de oscilador masa-resorte">
+        <div class="diagram">
+          <div class="diagram-main">
+            <svg class="diagram-svg" viewBox="0 0 620 360" role="img" aria-label="Masa resorte con onda de posición">
+              <defs>
+                <linearGradient id="massGradient" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#c8e6ff" />
+                  <stop offset="1" stop-color="#6fa7dd" />
+                </linearGradient>
+                <marker id="axisArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                  <path d="M0,0 L8,3 L0,6 Z" fill="#1f2f40" />
+                </marker>
+                <marker id="redArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                  <path d="M0,0 L8,3 L0,6 Z" fill="#bd1e1e" />
+                </marker>
+                <marker id="redArrowBack" markerWidth="10" markerHeight="10" refX="1" refY="3" orient="auto">
+                  <path d="M8,0 L0,3 L8,6 Z" fill="#bd1e1e" />
+                </marker>
+                <marker id="blueArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                  <path d="M0,0 L8,3 L0,6 Z" fill="#3f7dc6" />
+                </marker>
+                <marker id="blueArrowBack" markerWidth="10" markerHeight="10" refX="1" refY="3" orient="auto">
+                  <path d="M8,0 L0,3 L8,6 Z" fill="#3f7dc6" />
+                </marker>
+                <marker id="greenArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                  <path d="M0,0 L8,3 L0,6 Z" fill="#2f9b72" />
+                </marker>
+                <marker id="resultRedArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                  <path d="M0,0 L8,3 L0,6 Z" fill="#c92d2d" />
+                </marker>
+              </defs>
+
+              <rect class="diagram-wall" x="22" y="28" width="34" height="122" />
+              <path class="diagram-connector" d="M56 94 H88" />
+              <path class="diagram-spring" d="M88 94 C98 62 108 126 118 94 C128 62 138 126 148 94 C158 62 168 126 178 94 C188 62 198 126 208 94 C218 62 228 126 238 94 C248 62 258 126 268 94 C278 62 288 126 298 94 C308 62 318 126 328 94 C338 62 348 126 358 94" />
+              <path class="diagram-connector" d="M358 94 H392" />
+
+              <g class="diagram-mass">
+                <rect class="mass-body" x="392" y="58" width="72" height="72" rx="8" />
+                <text class="mass-label" x="428" y="103" text-anchor="middle">m</text>
+              </g>
+
+              <path class="diagram-axis" d="M50 150 H580" />
+              <text class="diagram-math" x="593" y="158">x</text>
+              <line class="diagram-guide" x1="164" y1="145" x2="164" y2="318" />
+              <line class="diagram-guide" x1="314" y1="145" x2="314" y2="318" />
+              <line class="diagram-guide" x1="474" y1="58" x2="474" y2="318" />
+              <text class="diagram-math" x="164" y="176" text-anchor="middle">-A</text>
+              <text class="diagram-math" x="314" y="176" text-anchor="middle">0</text>
+              <text class="diagram-math" x="474" y="176" text-anchor="middle">+A</text>
+
+              <text class="diagram-red" x="410" y="20" text-anchor="middle">Desplazamiento inicial</text>
+              <text class="diagram-red" x="430" y="45" text-anchor="middle">x<tspan baseline-shift="sub">0</tspan> = <tspan id="visualX0">2.00</tspan> cm</text>
+              <line class="red-arrow" x1="392" y1="58" x2="474" y2="58" />
+
+              <line class="wave-guide" x1="70" y1="218" x2="560" y2="218" />
+              <line class="wave-guide" x1="70" y1="260" x2="560" y2="260" />
+              <line class="wave-guide" x1="70" y1="302" x2="560" y2="302" />
+              <path class="wave-path" d="M92 292 C132 176 190 176 232 260 C274 344 342 344 386 260 C430 176 492 176 536 292" />
+              <text class="diagram-math" x="26" y="266">x(t)</text>
+              <text class="diagram-math" x="70" y="224">+A</text>
+              <text class="diagram-math" x="70" y="308">-A</text>
+            </svg>
+            <span class="velocity-tag">La animación cambia su ritmo con T: período actual = <span id="visualPeriodTag">2.00</span> s</span>
+          </div>
+
+          <div class="diagram-side">
+            <div class="diagram-card">
+              <h3>DATOS</h3>
+              <ul>
+                <li>Velocidad máxima:<br><strong>v<sub>max</sub> = <span id="visualVmax">10.00</span> cm/s</strong></li>
+                <li>Período de oscilación:<br><strong>T = <span id="visualPeriod">2.00</span> s</strong></li>
+                <li>Desplazamiento inicial:<br><strong>x<sub>0</sub> = <span id="visualX0Side">2.00</span> cm</strong></li>
+              </ul>
+            </div>
+            <div class="diagram-note">
+              El movimiento es armónico simple: masa-resorte horizontal sin fricción.
+            </div>
+          </div>
+
+          <div class="diagram-results" aria-label="Resumen visual de resultados">
+            <div class="diagram-result">
+              <div class="diagram-result-title blue"><span class="bubble">a</span> Amplitud</div>
+              <div class="diagram-answer">A = <span id="visualAmp">3.183</span> cm</div>
+              <svg viewBox="0 0 120 24" aria-hidden="true"><line class="blue-arrow" x1="20" y1="12" x2="100" y2="12" /></svg>
+            </div>
+            <div class="diagram-result">
+              <div class="diagram-result-title green"><span class="bubble">b</span> Velocidad inicial</div>
+              <div class="diagram-answer">v<sub>0</sub> = <span id="visualV0">7.779</span> cm/s</div>
+              <svg viewBox="0 0 120 24" aria-hidden="true"><line class="green-arrow" x1="22" y1="12" x2="100" y2="12" /></svg>
+            </div>
+            <div class="diagram-result">
+              <div class="diagram-result-title red"><span class="bubble">c</span> Aceleración máxima</div>
+              <div class="diagram-answer">a<sub>max</sub> = <span id="visualAmax">0.31416</span> m/s²</div>
+              <svg viewBox="0 0 120 24" aria-hidden="true"><line class="red-result-arrow" x1="22" y1="12" x2="100" y2="12" /></svg>
+            </div>
+            <div class="diagram-result">
+              <div class="diagram-result-title purple"><span class="bubble">d</span> Ángulo de fase</div>
+              <div class="diagram-answer">φ = <span id="visualPhi">51.07</span>°</div>
+              <svg viewBox="0 0 72 42" aria-hidden="true">
+                <circle cx="34" cy="22" r="18" fill="none" stroke="#6a49af" stroke-width="2" />
+                <path d="M34 22 H52 M34 22 L48 10 M34 22 V4" fill="none" stroke="#6a49af" stroke-width="2" />
+                <text x="51" y="13" fill="#6a49af" font-size="12">φ</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="layout">
+      <div>
+        <article class="section" aria-labelledby="data-title">
+          <div class="section-header">
+            <h2 id="data-title">Datos e incógnitas</h2>
+            <span class="mini-icon">i</span>
+          </div>
+          <div class="grid">
+            <div class="data-item">
+              <div class="label">Velocidad máxima</div>
+              <div class="value">v<sub>max</sub> = <span id="vmaxData">10.00</span> cm/s = <span id="vmaxM">0.100</span> m/s</div>
+            </div>
+            <div class="data-item">
+              <div class="label">Período</div>
+              <div class="value">T = <span id="periodData">2.00</span> s</div>
+            </div>
+            <div class="data-item">
+              <div class="label">Desplazamiento inicial</div>
+              <div class="value">x<sub>0</sub> = <span id="x0Data">2.00</span> cm = <span id="x0M">0.020</span> m</div>
+            </div>
+            <div class="data-item">
+              <div class="label">Incógnitas</div>
+              <div class="value">A, v<sub>0</sub>, a<sub>max</sub>, φ<sub>0</sub></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="section" aria-labelledby="controls-title">
+          <div class="section-header">
+            <h2 id="controls-title">Controles</h2>
+            <span class="mini-icon">↕</span>
+          </div>
+          <div class="grid">
+            <label class="control">
+              <span class="control-row">
+                <strong>v<sub>max</sub> (cm/s)</strong>
+                <input id="vmaxInput" type="number" min="1" max="80" step="0.1" value="10" />
+              </span>
+              <input id="vmaxRange" type="range" min="1" max="80" step="0.1" value="10" />
+            </label>
+            <label class="control">
+              <span class="control-row">
+                <strong>Período T (s)</strong>
+                <input id="periodInput" type="number" min="0.2" max="10" step="0.1" value="2" />
+              </span>
+              <input id="periodRange" type="range" min="0.2" max="10" step="0.1" value="2" />
+            </label>
+            <label id="x0Control" class="control">
+              <span class="control-row">
+                <strong>x<sub>0</sub> (cm)</strong>
+                <input id="x0Input" type="number" min="-20" max="20" step="0.1" value="2" />
+              </span>
+              <input id="x0Range" type="range" min="-20" max="20" step="0.1" value="2" />
+            </label>
+          </div>
+          <p class="note">
+            Nota: se usa la forma x = A cos(ω<sub>n</sub>t - φ<sub>0</sub>). Con esta convención,
+            x<sub>0</sub> = A cos(φ<sub>0</sub>) y v<sub>0</sub> = ω<sub>n</sub>A sin(φ<sub>0</sub>).
+          </p>
+        </article>
+      </div>
+
+      <div>
+        <article class="section" aria-labelledby="formulas-title">
+          <div class="section-header">
+            <h2 id="formulas-title">Fórmulas base</h2>
+            <span class="mini-icon">ƒ</span>
+          </div>
+          <div class="formula-grid">
+            <div class="formula">
+              <div class="math">x = A cos(ω<sub>n</sub>t - φ<sub>0</sub>)</div>
+              <small>Posición del movimiento.</small>
+            </div>
+            <div class="formula">
+              <div class="math">ẋ = -ω<sub>n</sub>A sin(ω<sub>n</sub>t - φ<sub>0</sub>)</div>
+              <small>Velocidad.</small>
+            </div>
+            <div class="formula">
+              <div class="math">ẍ = -ω<sub>n</sub><sup>2</sup>A cos(ω<sub>n</sub>t - φ<sub>0</sub>)</div>
+              <small>Aceleración.</small>
+            </div>
+          </div>
+        </article>
+
+        <article class="section" aria-labelledby="steps-title">
+          <div class="section-header">
+            <h2 id="steps-title">Procedimiento paso a paso</h2>
+            <span class="mini-icon">1</span>
+          </div>
+
+          <div class="why-box">
+            <span class="why-icon">ω</span>
+            <p>
+              Primero se obtiene la frecuencia angular. Luego, como la velocidad máxima ocurre
+              cuando |sin| = 1, se cumple v<sub>max</sub> = ω<sub>n</sub>A.
+            </p>
+          </div>
+
+          <div class="step-list">
+            <div class="step">
+              <div class="step-number">1</div>
+              <div>
+                <strong>Convierte el período a frecuencia angular</strong>
+                <span class="math">ω<sub>n</sub> = 2π / T = 2π / <span id="periodStep">2.00</span> = <span id="omegaValue">3.1416</span> rad/s</span>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-number">2</div>
+              <div>
+                <strong>Calcula la amplitud con la velocidad máxima</strong>
+                <span class="math">A = v<sub>max</sub> / ω<sub>n</sub> = <span id="vmaxStep">0.100</span> / <span id="omegaValueA">3.1416</span> = <span id="ampM">0.03183</span> m</span>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-number">3</div>
+              <div>
+                <strong>Encuentra el ángulo de fase con la posición inicial</strong>
+                <span class="math">cos(φ<sub>0</sub>) = x<sub>0</sub> / A = <span id="x0Step">0.020</span> / <span id="ampMA">0.03183</span> = <span id="cosPhi">0.6283</span></span>
+                <span class="math">φ<sub>0</sub> = cos<sup>-1</sup>(<span id="cosPhiA">0.6283</span>) = <span id="phiDeg">51.07</span>°</span>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-number">4</div>
+              <div>
+                <strong>Calcula la velocidad inicial</strong>
+                <span class="math">v<sub>0</sub> = ω<sub>n</sub>A sin(φ<sub>0</sub>) = <span id="v0M">0.07779</span> m/s</span>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-number">5</div>
+              <div>
+                <strong>Calcula la aceleración máxima</strong>
+                <span class="math">a<sub>max</sub> = ω<sub>n</sub><sup>2</sup>A = <span id="amaxM">0.31416</span> m/s²</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="result-card" aria-labelledby="result-title">
+          <h2 id="result-title">Resultados finales</h2>
+          <div class="result-grid">
+            <div class="result-item">
+              <div class="label">a) Amplitud</div>
+              <div class="result-value">A = <span id="ampCm">3.183</span> cm</div>
+            </div>
+            <div class="result-item">
+              <div class="label">b) Velocidad inicial</div>
+              <div class="result-value">v<sub>0</sub> = <span id="v0Cm">7.779</span> cm/s</div>
+            </div>
+            <div class="result-item">
+              <div class="label">c) Aceleración máxima</div>
+              <div class="result-value">a<sub>max</sub> = <span id="amaxFinal">0.31416</span> m/s²</div>
+            </div>
+            <div class="result-item">
+              <div class="label">d) Ángulo de fase</div>
+              <div class="result-value">φ<sub>0</sub> = <span id="phiFinal">51.07</span>°</div>
+            </div>
+          </div>
+          <div id="validation" class="validation">✓ Coincide con la respuesta esperada</div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Suposición didáctica: el movimiento se modela como x = A cos(wn*t - phi0).
+    const expected = {
+      vmaxCm: 10,
+      period: 2,
+      x0Cm: 2,
+      amplitudeM: 0.03183,
+      velocityM: 0.07779,
+      accelerationM: 0.31416,
+      phaseDeg: 51.07
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const vmaxInput = $("vmaxInput");
+    const vmaxRange = $("vmaxRange");
+    const periodInput = $("periodInput");
+    const periodRange = $("periodRange");
+    const x0Input = $("x0Input");
+    const x0Range = $("x0Range");
+    const validation = $("validation");
+    const x0Control = $("x0Control");
+
+    const format = (value, decimals = 2) =>
+      Number(value).toLocaleString("es-MX", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      });
+
+    const plain = (value, decimals = 4) =>
+      Number(value).toLocaleString("es-MX", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+        useGrouping: false
+      });
+
+    function clamp(value, min, max) {
+      return Math.min(Math.max(Number(value), min), max);
+    }
+
+    function syncPair(source, target, min, max) {
+      const value = clamp(source.value, min, max);
+      source.value = value;
+      target.value = value;
+      update();
+    }
+
+    function update() {
+      const vmaxCm = clamp(vmaxInput.value, 1, 80);
+      const period = clamp(periodInput.value, 0.2, 10);
+      const x0Cm = clamp(x0Input.value, -20, 20);
+      const vmaxM = vmaxCm / 100;
+      const x0M = x0Cm / 100;
+      const omega = (2 * Math.PI) / period;
+      const amplitudeM = vmaxM / omega;
+      const isPhysical = Math.abs(x0M) <= amplitudeM;
+      const cosPhi = isPhysical ? x0M / amplitudeM : NaN;
+      const phaseRad = isPhysical ? Math.acos(cosPhi) : NaN;
+      const phaseDeg = isPhysical ? phaseRad * 180 / Math.PI : NaN;
+      const velocityM = isPhysical ? omega * amplitudeM * Math.sin(phaseRad) : NaN;
+      const accelerationM = omega * omega * amplitudeM;
+      const matchesExpected =
+        Math.abs(vmaxCm - expected.vmaxCm) < 0.001 &&
+        Math.abs(period - expected.period) < 0.001 &&
+        Math.abs(x0Cm - expected.x0Cm) < 0.001 &&
+        isPhysical;
+
+      document.querySelector(".oscillator").style.setProperty("--period-animation", `${period}s`);
+
+      $("vmaxData").textContent = format(vmaxCm);
+      $("visualVmax").textContent = format(vmaxCm);
+      $("vmaxM").textContent = format(vmaxM, 3);
+      $("periodData").textContent = format(period);
+      $("visualPeriod").textContent = format(period);
+      $("visualPeriodTag").textContent = format(period);
+      $("x0Data").textContent = format(x0Cm);
+      $("visualX0").textContent = format(x0Cm);
+      $("visualX0Side").textContent = format(x0Cm);
+      $("x0M").textContent = format(x0M, 3);
+      $("periodStep").textContent = format(period);
+      $("omegaValue").textContent = plain(omega, 4);
+      $("omegaValueA").textContent = plain(omega, 4);
+      $("vmaxStep").textContent = format(vmaxM, 3);
+      $("ampM").textContent = plain(amplitudeM, 5);
+      $("ampMA").textContent = plain(amplitudeM, 5);
+      $("x0Step").textContent = format(x0M, 3);
+      $("cosPhi").textContent = isPhysical ? plain(cosPhi, 4) : "no válido";
+      $("cosPhiA").textContent = isPhysical ? plain(cosPhi, 4) : "no válido";
+      $("phiDeg").textContent = isPhysical ? format(phaseDeg, 2) : "no válido";
+      $("v0M").textContent = isPhysical ? plain(velocityM, 5) : "no válido";
+      $("amaxM").textContent = plain(accelerationM, 5);
+      $("ampCm").textContent = format(amplitudeM * 100, 3);
+      $("visualAmp").textContent = format(amplitudeM * 100, 3);
+      $("v0Cm").textContent = isPhysical ? format(velocityM * 100, 3) : "no válido";
+      $("visualV0").textContent = isPhysical ? format(velocityM * 100, 3) : "no válido";
+      $("amaxFinal").textContent = plain(accelerationM, 5);
+      $("visualAmax").textContent = plain(accelerationM, 5);
+      $("phiFinal").textContent = isPhysical ? format(phaseDeg, 2) : "no válido";
+      $("visualPhi").textContent = isPhysical ? format(phaseDeg, 2) : "no válido";
+
+      x0Control.classList.toggle("invalid", !isPhysical);
+      validation.classList.toggle("warning", !matchesExpected);
+      validation.textContent = !isPhysical
+        ? "Revisa x0: no puede ser mayor que la amplitud calculada"
+        : matchesExpected
+          ? "✓ Coincide con la respuesta esperada"
+          : "✓ Recalculado con los valores actuales";
+    }
+
+    vmaxInput.addEventListener("input", () => syncPair(vmaxInput, vmaxRange, 1, 80));
+    vmaxRange.addEventListener("input", () => syncPair(vmaxRange, vmaxInput, 1, 80));
+    periodInput.addEventListener("input", () => syncPair(periodInput, periodRange, 0.2, 10));
+    periodRange.addEventListener("input", () => syncPair(periodRange, periodInput, 0.2, 10));
+    x0Input.addEventListener("input", () => syncPair(x0Input, x0Range, -20, 20));
+    x0Range.addEventListener("input", () => syncPair(x0Range, x0Input, -20, 20));
+
+    update();
+  </script>
+</body>
+</html>
